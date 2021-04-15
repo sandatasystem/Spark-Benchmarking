@@ -4,4 +4,6 @@
 3) Automate mapr ticket generation
 4) Print benchmark via tabulate python
 4) Find a way to set TTL for mapr ticket generation
-5) Store requirements.txt for jenkins pod
+5) Store requirements.txt for jenkins server
+6) Document all required packages and implementation plan and hand over to HPE
+
