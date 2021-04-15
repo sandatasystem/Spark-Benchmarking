@@ -2,26 +2,8 @@ import random
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StringType, StructField, StructType
 import time
+from utility import time_it
 from argparse import ArgumentParser
-
-
-def time_it(func):
-    """
-    Utility decorator used to time any operations
-    """
-    def print_metrics(*args, **kwargs):
-        before_time = time.time()
-        print(f"Time before function: {before_time}")
-
-        func(*args, **kwargs)
-
-        after_time = time.time()
-        print(f"Time after function: {after_time}")
-
-        # TODO: verify that this is in seconds
-        print(f"Operation took: {after_time -before_time} seconds")
-
-    return print_metrics
 
 
 def generate_df_with_n_rows(rows):
@@ -40,22 +22,23 @@ def perform_inner_join(df_one, df_two, key_to_join_on):
 
 def configure_argparse():
     parser = ArgumentParser()
-    parser.add_argument("rows_of_df_one", type=int, help="This is the number of rows of dataframe one")
-    parser.add_argument("rows_of_df_two", type=int, help="This is the number of rows of dataframe two")
-
-    return vars(parser.parse_args()).values()
+    parser.add_argument("num_rows_to_generate", type=str, help="Number of rows to produce for each dataframe", nargs='+')
+    args = parser.parse_args()
+    return ' '.join(args.num_rows_to_generate)
 
 
 def main():
-    rows_df_one, rows_df_two = configure_argparse()
-    df_one, df_two = generate_df_with_n_rows(rows_df_one), generate_df_with_n_rows(rows_df_two)
+    num_rows_to_generate = configure_argparse()
+    table = []
+    for num_rows in num_rows_to_generate.split(" "):
+        print(f"GENERATING DATAFRAME WITH {num_rows} ROWS")
+        df_one, df_two = generate_df_with_n_rows(int(num_rows)), generate_df_with_n_rows(int(num_rows))
 
-    # LETS TIME THE FOLLOWING OPERATIONS
-    perform_inner_join(df_one, df_two, 'a')
-    # perform_left_join
-    # perform_right_join
+        # LETS TIME THE FOLLOWING OPERATIONS
+        perform_inner_join(df_one, df_two, 'a')
 
 
 if __name__ == '__main__':
     spark = SparkSession.builder.appName("Spark Benchmark").getOrCreate()
     main()
+

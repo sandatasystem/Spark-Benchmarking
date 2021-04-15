@@ -12,7 +12,7 @@ spec:
   mode: cluster
   image: gcr.io/mapr-252711/spark-2.4.5:202010301117C
   imagePullPolicy: Always
-  mainApplicationFile: "local:///spark-benchmark-mount/terrasort.py"
+  mainApplicationFile: "local:///spark-benchmark-mount/scripts/terrasort.py"
   restartPolicy:
     type: Never
   imagePullSecrets:
@@ -21,7 +21,7 @@ spec:
   volumes:
   - name: spark-benchmark-pv
     persistentVolumeClaim:
-      claimName: spark-benchmark-claim2
+      claimName: spark-benchmark-claim
 
   driver:
     cores: 1

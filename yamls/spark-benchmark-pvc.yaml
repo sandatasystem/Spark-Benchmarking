@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: spark-benchmark-claim
 spec:
-  storageClassName: "{{STORAGE_CLASS_NAME}}"
+  storageClassName: df01
   accessModes:
     - ReadWriteOnce
   resources:

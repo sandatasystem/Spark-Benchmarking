@@ -1,10 +1,18 @@
 namespace=$1
 
-kubectl delete -f /root/Spark-Benchmarking-main/yamls/spark-benchmark-join.yaml -n $namespace &
-kubectl delete -f /root/Spark-Benchmarking-main/yamls/spark-benchmark-terragen.yaml -n $namespace &
-wait $!
+printf "\n\n\n\n\nDELETING SPARK JOIN OPERATOR\n\n\n\n\n"
+kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-join -n $namespace
 
+printf "\n\n\n\n\nDELETING SPARK TERRAGEN OPERATOR\n\n\n\n\n"
+kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terragen -n $namespace
 
-kubectl delete -f /root/Spark-Benchmarking-main/yamls/spark-benchmark-temp-pod.yaml -n $namespace &
-kubectl delete -f /root/Spark-Benchmarking-main/yamls/spark-benchmark-pvc.yaml -n $namespace &
-wait $!
+printf "\n\n\n\n\nDELETING SPARK TERRASORT OPERATOR\n\n\n\n\n"
+# kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terrasort -n $namespace
+
+printf "\n\n\n\n\nDELETING TEMP POD\n\n\n\n\n"
+kubectl delete pod spark-benchmark-temp-pod -n $namespace
+
+printf "\n\n\n\n\nDELETING PVC\n\n\n\n\n"
+kubectl delete pvc spark-benchmark-claim -n $namespace
+
+printf "\n\n\n\n\nDone .... :)\n\n\n\n\n"

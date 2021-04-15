@@ -1,7 +1,7 @@
 apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
-  name: spark-benchmark
+  name: spark-benchmark-join
   namespace: t01
 spec:
   sparkConf:
@@ -12,11 +12,11 @@ spec:
   mode: cluster
   image: gcr.io/mapr-252711/spark-2.4.5:202010301117C
   imagePullPolicy: Always
-  mainApplicationFile: "local:///spark-benchmark-mount/join_table.py"
+  mainApplicationFile: "local:///spark-benchmark-mount/scripts/join_table.py"
   restartPolicy:
     type: Never
   arguments:
-  - {{DF_ONE_ROWS}} {{DF_TWO_ROWS}}
+  - {{DF_ROWS_ARGUMENTS}}
   imagePullSecrets:
   - imagepull
 
