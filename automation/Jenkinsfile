@@ -22,4 +22,43 @@ node {
       """
     }
   }
+  
+  stage('Spark Submit') {
+    withKubeConfig([credentialsId: 'spark-benchmark-token',
+                    serverUrl: "${apiserverurl}"
+                   ]) {
+      sh "/usr/local/bin/kubectl get pods -n $namespace"
+      sh """
+         export DRIVER_NUMBER_OF_CORES=1
+         export EXECUTOR_NUMBER_OF_CORES=1
+         export NUMBER_OF_EXECUTOR_INSTANCES=3
+         export DF_ROWS_ARGUMENTS="20000 40000 60000"
+         export NUMBER_OF_ARGUMENTS=$(echo $DF_ROWS_ARGUMENTS | wc -w)
+         echo "SUBMITTING JOIN SCRIPT"
+         /bin/j2 $WORKSPACE/yamls/spark-benchmark-join.yaml > /tmp/spark-benchmark-join.yaml
+         /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-join.yaml -n $namespace
+         sleep 150
+         
+         benchmarks=$(kubectl logs spark-benchmark-join-driver -n t01 | grep -Po -m $NUMBER_OF_ARGUMENTS "(\d*\.?\d*) seconds$")
+         echo "FINISHED JOIN SCRIPT. BENCHMARK TIMES ARE $benchmarks"
+         kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-join -n $namespace
+         
+         echo "SUBMITTING TERRAGEN SCRIPT"
+         export NUMBER_OF_ROWS_TO_GENERATE=200000
+         /bin/j2 $WORKSPACE/yamls/spark-benchmark-terragen.yaml > /tmp/spark-benchmark-terragen.yaml
+         /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terragen.yaml -n $namespace
+         sleep 110
+         
+         kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terragen -n $namespace
+         echo "FINISHED TERRAGEN SCRIPT"
+        
+         echo "SUBMITTING TERRASORT SCRIPT"
+         /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-terrasort.yaml -n $namespace
+         sleep 150
+         benchmarks=$(kubectl logs spark-benchmark-terrasort-driver -n $namespace | grep -Po -m 3 "(\d*\.?\d*) seconds$")
+         echo "FINISHED TERRASORT. BENCHMARK TIMES ARE $benchmarks"
+      """
+    }
+  }
+  
 }
