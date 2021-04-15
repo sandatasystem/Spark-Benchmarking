@@ -1,0 +1,49 @@
+node {
+  checkout scm
+  
+  stage('Copy files') {
+    withKubeConfig([credentialsId: 'spark-benchmark-token',
+                    serverUrl: "${apiserverurl}"
+                   ]) {
+      def namespace="${namespace}"
+      sh "/usr/local/bin/kubectl get pods -n $namespace"
+      sh """
+         export STORAGE_CLASS_NAME='df01'
+         echo "CREATING PVC"
+         /bin/j2 $WORKSPACE/yamls/spark-benchmark-pvc.yaml > /tmp/spark-benchmark-pvc.yaml
+         /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-pvc.yaml -n $namespace
+         
+         echo "CREATING TEMP POD"
+         /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-temp-pod.yaml -n $namespace
+         sleep 30
+        
+         echo "COPYING SCRIPTS TO PVC"
+         /usr/local/bin/kubectl cp $WORKSPACE/scripts $namespace/spark-benchmark-temp-pod:/spark-benchmark-mount/
+         /usr/local/bin/kubectl exec -n $namespace -i spark-benchmark-temp-pod -- mkdir -p spark-benchmark-mount/terragen-files
+         /usr/local/bin/kubectl exec -n $namespace -i spark-benchmark-temp-pod -- chmod -R 777 spark-benchmark-mount/terragen-files
+         /usr/local/bin/kubectl delete -f $WORKSPACE/yamls/spark-benchmark-temp-pod.yaml -n $namespace
+      """
+    }
+  }
+  stage('Spark Submit') {
+    withKubeConfig([credentialsId: 'spark-benchmark-token',
+                    serverUrl: "${apiserverurl}"
+                   ]) {
+      def namespace="${namespace}"
+      sh "/usr/local/bin/kubectl get pods -n $namespace"
+      sh """
+         export STORAGE_CLASS_NAME='df01'
+         echo "SUBMITTING JOIN SCRIPT"
+         /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-join.yaml -n $namespace
+         sleep 5
+         
+         echo "SUBMITTING TERRAGEN SCRIPT"
+         /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-terragen.yaml -n $namespace
+         sleep 5
+        
+         echo "WAITING FOR JOIN SCRIPT TO FINISH"
+         /usr/local/bin/kubectl logs -f spark-benchmark-driver -n $namespace
+      """
+    }
+  }
+}
