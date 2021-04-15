@@ -39,7 +39,7 @@ node {
          /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-join.yaml -n $namespace
          sleep 150
          
-         benchmarks=$(kubectl logs spark-benchmark-join-driver -n t01 | grep -Po -m $NUMBER_OF_ARGUMENTS "(\d*\.?\d*) seconds$")
+         benchmarks=$(kubectl logs spark-benchmark-join-driver -n t01 | grep -Po -m $NUMBER_OF_ARGUMENTS "(\d*\.?\d*) seconds\$")
          echo "FINISHED JOIN SCRIPT. BENCHMARK TIMES ARE $benchmarks"
          kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-join -n $namespace
          
@@ -55,7 +55,7 @@ node {
          echo "SUBMITTING TERRASORT SCRIPT"
          /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-terrasort.yaml -n $namespace
          sleep 150
-         benchmarks=$(kubectl logs spark-benchmark-terrasort-driver -n $namespace | grep -Po -m 3 "(\d*\.?\d*) seconds$")
+         benchmarks=$(kubectl logs spark-benchmark-terrasort-driver -n $namespace | grep -Po -m 3 "(\d*\.?\d*) seconds\$")
          echo "FINISHED TERRASORT. BENCHMARK TIMES ARE $benchmarks"
       """
     }
