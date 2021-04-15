@@ -40,7 +40,7 @@ node {
          sleep 150
          
          echo "FINISHED JOIN SCRIPT. BENCHMARK TIMES ARE"
-         /usr/local/bin/kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po -m 3 "(\\d*\\.?\\d*) seconds\$")
+         /usr/local/bin/kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po -m 3 "(\\d*\\.?\\d*) seconds\$"
          /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-join -n $namespace
          
          echo "SUBMITTING TERRAGEN SCRIPT"
