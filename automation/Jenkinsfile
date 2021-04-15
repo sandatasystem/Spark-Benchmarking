@@ -39,9 +39,9 @@ node {
          /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-join.yaml -n $namespace
          sleep 150
          
-         export benchmarks=`kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po -m 3 "(\\d*\\.?\\d*) seconds\$")`
-         echo "FINISHED JOIN SCRIPT. BENCHMARK TIMES ARE $benchmarks"
-         kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-join -n $namespace
+         echo "FINISHED JOIN SCRIPT. BENCHMARK TIMES ARE"
+         /usr/local/bin/kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po -m 3 "(\\d*\\.?\\d*) seconds\$")
+         /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-join -n $namespace
          
          echo "SUBMITTING TERRAGEN SCRIPT"
          export NUMBER_OF_ROWS_TO_GENERATE=200000
@@ -49,14 +49,15 @@ node {
          /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terragen.yaml -n $namespace
          sleep 110
          
-         kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terragen -n $namespace
+         /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terragen -n $namespace
          echo "FINISHED TERRAGEN SCRIPT"
         
          echo "SUBMITTING TERRASORT SCRIPT"
          /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-terrasort.yaml -n $namespace
          sleep 150
-         export benchmarks=`kubectl logs spark-benchmark-terrasort-driver -n $namespace | grep -Po -m 3 "(\\d*\\.?\\d*) seconds\$"`
-         echo "FINISHED TERRASORT. BENCHMARK TIMES ARE $benchmarks"
+         
+         echo "FINISHED TERRASORT. BENCHMARK TIMES ARE"
+         /usr/local/bin/kubectl logs spark-benchmark-terrasort-driver -n $namespace | grep -Po -m 3 "(\\d*\\.?\\d*) seconds\$"
       """
     }
   }
