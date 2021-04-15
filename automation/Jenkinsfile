@@ -5,7 +5,6 @@ node {
     withKubeConfig([credentialsId: 'spark-benchmark-token',
                     serverUrl: "${apiserverurl}"
                    ]) {
-      def namespace="${namespace}"
       sh "/usr/local/bin/kubectl get pods -n $namespace"
       sh """
          echo "CREATING PVC"
@@ -27,7 +26,6 @@ node {
     withKubeConfig([credentialsId: 'spark-benchmark-token',
                     serverUrl: "${apiserverurl}"
                    ]) {
-      def namespace="${namespace}"
       sh "/usr/local/bin/kubectl get pods -n $namespace"
       sh """
          export STORAGE_CLASS_NAME='df01'
