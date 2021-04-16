@@ -7,6 +7,9 @@ node {
                    ]) {
       sh "/usr/local/bin/kubectl get pods -n $namespace"
       sh """
+         echo "PERFORMING MAPRTICKET GENERATION FOR USER: $mapruser"
+         /usr/local/bin/kubectl exec -it tenantcli-0 bash -n $namespace -- bash -c "printf '$mapruser\n$maprpassword\njenkins-secret\nn' | kubernetes/ticketcreator.sh">/dev/null
+         sleep 5
          echo "CREATING PVC"
          /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-pvc.yaml -n $namespace
          
@@ -18,7 +21,6 @@ node {
          /usr/local/bin/kubectl cp $WORKSPACE/scripts $namespace/spark-benchmark-temp-pod:/spark-benchmark-mount/
          /usr/local/bin/kubectl exec -n $namespace -i spark-benchmark-temp-pod -- mkdir -p spark-benchmark-mount/terragen-files
          /usr/local/bin/kubectl exec -n $namespace -i spark-benchmark-temp-pod -- chmod -R 777 spark-benchmark-mount/terragen-files
-         /usr/local/bin/kubectl delete -f $WORKSPACE/yamls/spark-benchmark-temp-pod.yaml -n $namespace
       """
     }
   }
@@ -61,5 +63,32 @@ node {
       """
     }
   }
-  
+  stage('Cleanup') {
+    withKubeConfig([credentialsId: 'spark-benchmark-token',
+                    serverUrl: "${apiserverurl}"
+                   ]) {
+      sh "/usr/local/bin/kubectl get pods -n $namespace"
+      sh """
+         echo "DELETING SPARK JOIN OPERATOR"
+         /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-join -n $namespace
+
+         echo "DELETING SPARK TERRAGEN OPERATOR"
+         /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terragen -n $namespace
+
+         echo "DELETING SPARK TERRASORT OPERATOR"
+         /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terrasort -n $namespace
+
+         echo "DELETING TEMP POD"
+         /usr/local/bin/kubectl delete pod spark-benchmark-temp-pod -n $namespace
+
+         echo "DELETING PVC"
+         /usr/local/bin/kubectl delete pvc spark-benchmark-claim -n $namespace
+
+         echo "DELETING MAPR TICKET"
+         /usr/local/bin/kubectl delete secret jenkins-secret -n $namespace
+
+         echo "Done .... :)"
+      """
+    }
+  }
 }
