@@ -54,6 +54,9 @@ node {
       sh "/usr/local/bin/kubectl get pods -n $namespace"
       sh """
          echo "SUBMITTING TERRAGEN SCRIPT"
+         export DRIVER_NUMBER_OF_CORES=1
+         export EXECUTOR_NUMBER_OF_CORES=1
+         export NUMBER_OF_EXECUTOR_INSTANCES=3
          export NUMBER_OF_ROWS_TO_GENERATE=$rowstogenerate
          /bin/j2 $WORKSPACE/yamls/spark-benchmark-terragen.yaml > /tmp/spark-benchmark-terragen.yaml
          /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terragen.yaml -n $namespace
