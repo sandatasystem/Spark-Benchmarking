@@ -6,17 +6,17 @@ export PASSWORD="balice"
 
 printf "\n\n\n\n PERFORMING MAPRTICKET GENERATION FOR USER: $USERNAME \n\n\n\n"
 kubectl exec -it tenantcli-0 bash -n t01 -- bash -c "printf '$USERNAME\n$PASSWORD\njenkins-secret\nn' | kubernetes/ticketcreator.sh">/dev/null
-sleep 5
+sleep 10
 
 # Creating a PVC
 printf "\n\n\n\nCREATING PVC\n\n\n\n\n"
 kubectl apply -f $HOME/Spark-Benchmarking/yamls/spark-benchmark-pvc.yaml -n $namespace
-sleep 10
+sleep 15
 
 # Creating a temp pod
 printf "\n\n\n\nCREATING TEMP POD\n\n\n\n"
 kubectl apply -f $HOME/Spark-Benchmarking/yamls/spark-benchmark-temp-pod.yaml -n $namespace
-sleep 35
+sleep 40
 
 # Copying all python scripts to PVC
 printf "\n\n\n\nCOPYING SCRIPTS TO PVC\n\n\n\n"
