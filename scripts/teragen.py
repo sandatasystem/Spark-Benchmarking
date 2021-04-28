@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession
 import random
 import sys
 import os
+from time import time
 
 
 def generate():
@@ -13,7 +14,7 @@ def generate():
 
     rdd_ = SC.parallelize(
         [partition_index for partition_index in range(NUMBER_OF_PARTITIONS)]
-    ).mapPartitionsWithIndex(generate_rows_for_partition)
+    ).mapPartitionsWithIndex(generate_rows_for_partition, preservesPartitioning=True)
 
     rdd_.collect()
 
@@ -53,7 +54,7 @@ def generate_single_row(row_id):
     list_of_bytes = []
 
     # First 10 bytes of random ints
-    list_of_bytes.extend([random.randint(0, 255) for iteration in range(10)])
+    list_of_bytes.extend([random.randint(0, 9) for element in range(10)])
 
     right_justified_row_id = str(row_id).rjust(10, '0')
 
@@ -61,9 +62,7 @@ def generate_single_row(row_id):
     list_of_bytes.extend([int(right_justified_row_id[index]) for index in range(len(right_justified_row_id))])
 
     # 78 bytes of random data
-    list_of_bytes.extend([random.randint(0, 255) for iteration in range(78)])
-
-    print(len(list_of_bytes))
+    list_of_bytes.extend([random.randint(0, 9) for iteration in range(78)])
 
     return bytes(list_of_bytes)
 
@@ -89,6 +88,12 @@ if __name__ == '__main__':
 
     NUMBER_OF_ROWS_PER_PARTITION = NUMBER_OF_ROWS_TO_GENERATE // NUMBER_OF_PARTITIONS
 
+    before_time = time()
+
     generate()
+
+    after_time = time()
+
+    print(f"Operation took: {after_time - before_time} seconds")
     get_size_of_data_generated()
 
