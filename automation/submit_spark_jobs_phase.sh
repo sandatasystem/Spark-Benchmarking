@@ -90,6 +90,6 @@ function submit_teragen_terasort_teravalidate(){
     done
 }
 
-# submit_join_job
+submit_join_job
 submit_teragen_terasort_teravalidate
 
