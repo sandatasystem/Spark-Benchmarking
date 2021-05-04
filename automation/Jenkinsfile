@@ -34,8 +34,8 @@ node {
          export DRIVER_NUMBER_OF_CORES=1
          export EXECUTOR_NUMBER_OF_CORES=1
          export NUMBER_OF_EXECUTOR_INSTANCES=3
-         export DF_ROWS_ARGUMENTS="20000 40000 60000"
-         export NUMBER_OF_ARGUMENTS=3
+         export NUMBER_OF_ROWS_TO_GENERATE=$rowstogenerate
+         export JOIN_TYPE=$join_type
          echo "SUBMITTING JOIN SCRIPT"
          /bin/j2 $WORKSPACE/yamls/spark-benchmark-join.yaml > /tmp/spark-benchmark-join.yaml
          /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-join.yaml -n $namespace
@@ -58,16 +58,29 @@ node {
          export EXECUTOR_NUMBER_OF_CORES=1
          export NUMBER_OF_EXECUTOR_INSTANCES=3
          export NUMBER_OF_ROWS_TO_GENERATE=$rowstogenerate
+         export TERAGEN_OUTPUT_DIR="/spark-benchmark-mount/teragen-files"
+         export TERASORT_INPUT_DIR="/spark-benchmark-mount/teragen-files"
+         export TERASORT_OUTPUT_DIR="/spark-benchmark-mount/teravalidate-files"
+         export TERAVALIDATE_INPUT_DIR="/spark-benchmark-mount/teravalidate-files"
          /bin/j2 $WORKSPACE/yamls/spark-benchmark-terragen.yaml > /tmp/spark-benchmark-terragen.yaml
          /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terragen.yaml -n $namespace
          sleep 110
-         echo "FINISHED TERRAGEN SCRIPT"
-        
+         echo "FINISHED TERRAGEN SCRIPT. TIME TO GENERATE $NUMBER_OF_ROWS_TO_GENERATE rows is,"
+         kubectl logs spark-benchmark-teragen-driver -n t01 | grep -Po "(\d*\.?\d*) seconds$"
+         
          echo "SUBMITTING TERRASORT SCRIPT"
          /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-terrasort.yaml -n $namespace
          sleep 150
+         echo "FINISHED TERASORT SRIPT. TIME TO SORT $NUMBER_OF_ROWS_TO_GENERATE rows is,"
+         kubectl logs spark-benchmark-terasort-driver -n t01 | grep -Po "(\d*\.?\d*) seconds$"
          
-         echo "FINISHED TERRASORT. BENCHMARK TIMES ARE"
+         echo "PERFORMING TERAVALIDATE ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
+	       j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teravalidate.yaml > /tmp/spark-benchmark-teravalidate.yaml
+	       kubectl apply -f /tmp/spark-benchmark-teravalidate.yaml -n $namespace
+         
+         kubectl logs spark-benchmark-teravalidate-driver -n t01 | grep -Po "(\d*\.?\d*) seconds$"
+         sleep 150
+         echo "FINISHED TERRAVALIDATE. BENCHMARK TIMES ARE"
          /usr/local/bin/kubectl logs spark-benchmark-terrasort-driver -n $namespace | grep -Po -m 3 "(\\d*\\.?\\d*) seconds\$"
       """
     }
