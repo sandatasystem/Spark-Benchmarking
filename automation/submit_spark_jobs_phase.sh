@@ -5,7 +5,7 @@ export DRIVER_NUMBER_OF_CORES=1
 export EXECUTOR_NUMBER_OF_CORES=1
 export NUMBER_OF_EXECUTOR_INSTANCES=3
 
-# Join script program will generate 20K, 40K, 60K row dataframes
+# Join script program will generate 500, 1000, 2000 row dataframes and then join them
 function submit_join_job(){
     for row_size in 500 1000 2000
     do
@@ -20,13 +20,13 @@ function submit_join_job(){
 
 	    if [ $row_size == 500 ]
 	    then
-		sleep 120
+		sleep 160
 	    elif [ $row_size == 1000 ]
 	    then
-		sleep 150
+		sleep 180
 	    elif [ $row_size == 2000 ]
 	    then
-		sleep 250
+		sleep 200
 	    fi
 
 	    benchmark=$(kubectl logs spark-benchmark-join-driver -n t01 | grep -Po "(\d*\.?\d*) seconds$")

@@ -1,9 +1,6 @@
 namespace=$1
 
 # Mapr ticket generation
-export USERNAME="alice"
-export PASSWORD="balice"
-
 printf "\n\n\n\n PERFORMING MAPRTICKET GENERATION FOR USER: $USERNAME \n\n\n\n"
 kubectl exec -it tenantcli-0 bash -n t01 -- bash -c "printf '$USERNAME\n$PASSWORD\njenkins-secret\nn' | kubernetes/ticketcreator.sh">/dev/null
 sleep 10
@@ -20,12 +17,11 @@ sleep 40
 
 # Copying all python scripts to PVC
 printf "\n\n\n\nCOPYING SCRIPTS TO PVC\n\n\n\n"
-kubectl cp $HOME/Spark-Benchmarking/scripts t01/spark-benchmark-temp-pod:/spark-benchmark-mount/ &
+kubectl cp $HOME/Spark-Benchmarking/scripts $namespace/spark-benchmark-temp-pod:/spark-benchmark-mount/ &
 sleep 10
 
 # Create teragen-files directory and make sure it has permissions for spark teragen script to write to 
 printf "\n\n\n\nCREATING TERRAGEN DIRECTORY\n\n\n\n"
 kubectl exec -n t01 -it spark-benchmark-temp-pod -- mkdir -p spark-benchmark-mount/teragen-files
-#TODO: Provide correct permissions on this directory instead of using 777
 kubectl exec -n t01 -it spark-benchmark-temp-pod -- chmod -R 777 spark-benchmark-mount/teragen-files
 sleep 10
