@@ -23,9 +23,9 @@ printf "\n\n\n\nCOPYING SCRIPTS TO PVC\n\n\n\n"
 kubectl cp $HOME/Spark-Benchmarking/scripts t01/spark-benchmark-temp-pod:/spark-benchmark-mount/ &
 sleep 10
 
-# Create terragen-files directory and make sure it has permissions for spark terragen script to write to 
+# Create teragen-files directory and make sure it has permissions for spark teragen script to write to 
 printf "\n\n\n\nCREATING TERRAGEN DIRECTORY\n\n\n\n"
-kubectl exec -n t01 -it spark-benchmark-temp-pod -- mkdir -p spark-benchmark-mount/terragen-files
+kubectl exec -n t01 -it spark-benchmark-temp-pod -- mkdir -p spark-benchmark-mount/teragen-files
 #TODO: Provide correct permissions on this directory instead of using 777
-kubectl exec -n t01 -it spark-benchmark-temp-pod -- chmod -R 777 spark-benchmark-mount/terragen-files
+kubectl exec -n t01 -it spark-benchmark-temp-pod -- chmod -R 777 spark-benchmark-mount/teragen-files
 sleep 10

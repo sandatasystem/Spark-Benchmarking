@@ -1,8 +1,7 @@
 apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
-  name: spark-benchmark-terrasort
-  namespace: t01
+  name: spark-benchmark-terasort
 spec:
   sparkConf:
     spark.mapr.user.secret: jenkins-secret
@@ -12,9 +11,11 @@ spec:
   mode: cluster
   image: gcr.io/mapr-252711/spark-2.4.5:202010301117C
   imagePullPolicy: Always
-  mainApplicationFile: "local:///spark-benchmark-mount/scripts/terrasort.py"
+  mainApplicationFile: "local:///spark-benchmark-mount/scripts/terasort.py"
   restartPolicy:
     type: Never
+  arguments:
+  - "{{TERASORT_INPUT_DIR}} {{TERASORT_OUTPUT_DIR}}"
   imagePullSecrets:
   - imagepull
 

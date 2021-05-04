@@ -2,7 +2,6 @@ apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
   name: spark-benchmark-join
-  namespace: t01
 spec:
   sparkConf:
     spark.mapr.user.secret: jenkins-secret
@@ -16,7 +15,7 @@ spec:
   restartPolicy:
     type: Never
   arguments:
-  - {{DF_ROWS_ARGUMENTS}}
+  - "{{DF_ROWS_ARGUMENTS}} {{JOIN_TYPE}}"
   imagePullSecrets:
   - imagepull
 
