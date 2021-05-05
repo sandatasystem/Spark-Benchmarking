@@ -22,6 +22,6 @@ sleep 10
 
 # Create teragen-files directory and make sure it has permissions for spark teragen script to write to 
 printf "\n\n\n\nCREATING TERRAGEN DIRECTORY\n\n\n\n"
-kubectl exec -n t01 -it spark-benchmark-temp-pod -- mkdir -p spark-benchmark-mount/teragen-files
-kubectl exec -n t01 -it spark-benchmark-temp-pod -- chmod -R 777 spark-benchmark-mount/teragen-files
+kubectl exec -n $namespace -it spark-benchmark-temp-pod -- mkdir -p spark-benchmark-mount/teragen-files
+kubectl exec -n $namespace -it spark-benchmark-temp-pod -- chmod -R 777 spark-benchmark-mount/teragen-files
 sleep 10

@@ -29,9 +29,9 @@ function submit_join_job(){
 		sleep 200
 	    fi
 
-	    benchmark=$(kubectl logs spark-benchmark-join-driver -n t01 | grep -Po "(\d*\.?\d*) seconds$")
+	    benchmark=$(kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 	    printf "\n\n\nFINISHED JOIN SCRIPT. TIME TO $join_type JOIN 2 DATAFRAME OF SIZE $row_size is $benchmark\n\n"
-	    kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-join -n t01
+	    kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-join -n $namespace
 	done
     done
 }
@@ -66,27 +66,27 @@ function submit_teragen_terasort_teravalidate(){
 	j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teragen.yaml > /tmp/spark-benchmark-teragen.yaml
 	kubectl apply -f /tmp/spark-benchmark-teragen.yaml -n $namespace
         tera_sleep $row_size
-	benchmark=$(kubectl logs spark-benchmark-teragen-driver -n t01 | grep -Po "(\d*\.?\d*) seconds$")
+	benchmark=$(kubectl logs spark-benchmark-teragen-driver -n namespace | grep -Po "(\d*\.?\d*) seconds$")
 	printf "\n\n\n FINISHED TERAGEN SRIPT. TIME TO GENERATE $row_size rows is $benchmark seconds"
-	kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-teragen -n t01
+	kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-teragen -n $namespace
 
         # TERASORT
         printf "PERFORMING TERASORT ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
 	j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-terasort.yaml > /tmp/spark-benchmark-terasort.yaml
 	kubectl apply -f /tmp/spark-benchmark-terasort.yaml -n $namespace 
 	tera_sleep $row_size
-	benchmark=$(kubectl logs spark-benchmark-terasort-driver -n t01 | grep -Po "(\d*\.?\d*) seconds$")
+	benchmark=$(kubectl logs spark-benchmark-terasort-driver -n namespace | grep -Po "(\d*\.?\d*) seconds$")
 	printf "FINISHED TERASORT SRIPT. TIME TO SORT $row_size rows is $benchmark seconds"
-        kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terasort -n t01
+        kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terasort -n $namespace
 
         # TERAVALIDATE
         printf "PERFORMING TERAVALIDATE ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
 	j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teravalidate.yaml > /tmp/spark-benchmark-teravalidate.yaml
 	kubectl apply -f /tmp/spark-benchmark-teravalidate.yaml -n $namespace 
 	tera_sleep $row_size
-	benchmark=$(kubectl logs spark-benchmark-teravalidate-driver -n t01 | grep -Po "(\d*\.?\d*) seconds$")
+	benchmark=$(kubectl logs spark-benchmark-teravalidate-driver -n namespace | grep -Po "(\d*\.?\d*) seconds$")
 	printf "FINISHED TERAVALIDATE SRIPT. TIME TO VALIDAE $row_size rows is $benchmark seconds"
-	kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-teravalidate -n t01
+	kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-teravalidate -n $namespace
     done
 }
 
