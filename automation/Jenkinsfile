@@ -68,7 +68,20 @@ node {
 	 sleep 120
 	 echo "FINISHED TERAGEN SCRIPT. BENCHMARK TIMES ARE"
 	 /usr/local/bin/kubectl logs spark-benchmark-teragen-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
-         
+	 
+	 echo "SUBMITTING TERASORT SCRIPT"
+	 /bin/j2 $WORKSPACE/yamls/spark-benchmark-terasort.yaml > /tmp/spark-benchmark-terasort.yaml
+	 /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terasort.yaml -n $namespace
+	 sleep 150
+	 echo "FINISHED TERASORT SRIPT. BENCHMARK TIMES ARE"
+	 /usr/local/bin/kubectl logs spark-benchmark-terasort-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
+	 
+	 echo "PERFORMING TERAVALIDATE"
+	 /bin/j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teravalidate.yaml > /tmp/spark-benchmark-teravalidate.yaml
+	 /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teravalidate.yaml -n $namespace
+	 sleep 150
+	 echo "FINISHED TERAVALIDATE. BENCHMARK TIMES ARE"
+	 /usr/local/bin/kubectl logs spark-benchmark-teravalidate-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
       """
     }
   }
