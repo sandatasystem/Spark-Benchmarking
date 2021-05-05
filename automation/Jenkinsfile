@@ -63,11 +63,11 @@ node {
          export TERASORT_OUTPUT_DIR="/spark-benchmark-mount/teravalidate-files"
          export TERAVALIDATE_INPUT_DIR="/spark-benchmark-mount/teravalidate-files"
 	 echo "PERFORMING TERAGEN ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
-         /bin/j2 $WORKSPACE/yamls/spark-benchmark-teragen.yaml > /tmp/spark-benchmark-teragen.yaml
-         /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teragen.yaml -n $namespace
-         sleep 110
+         #/bin/j2 $WORKSPACE/yamls/spark-benchmark-teragen.yaml > /tmp/spark-benchmark-teragen.yaml
+         #/usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teragen.yaml -n $namespace
+         #sleep 110
          echo "FINISHED TERAGEN SCRIPT. TIME TO GENERATE $NUMBER_OF_ROWS_TO_GENERATE rows is,"
-         /usr/local/bin/kubectl logs spark-benchmark-teragen-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
+         #/usr/local/bin/kubectl logs spark-benchmark-teragen-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
          
          echo "SUBMITTING TERASORT SCRIPT"
 	 /bin/j2 $WORKSPACE/yamls/spark-benchmark-terasort.yaml > /tmp/spark-benchmark-terasort.yaml
