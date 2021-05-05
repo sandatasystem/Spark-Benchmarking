@@ -11,7 +11,7 @@ node {
          /usr/local/bin/kubectl exec -i tenantcli-0 bash -n $namespace -- bash -c "printf '$mapruser\n$maprpassword\njenkins-secret\nn' | kubernetes/ticketcreator.sh">/dev/null
          sleep 5
          echo "CREATING PVC"
-         /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-pvc.yaml -n $namespace
+         /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-pvc.yaml -n $namespace
          
          echo "CREATING TEMP POD"
          /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-temp-pod.yaml -n $namespace
