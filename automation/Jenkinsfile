@@ -57,6 +57,9 @@ node {
          export DRIVER_NUMBER_OF_CORES=1
          export EXECUTOR_NUMBER_OF_CORES=1
          export NUMBER_OF_EXECUTOR_INSTANCES=3
+         export DF_ROWS_ARGUMENTS=$rowstogenerate
+         echo "SUBMITTING TERAGEN SCRIPT"
+         sleep 20
       """
     }
   }
