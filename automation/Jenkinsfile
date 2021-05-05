@@ -20,8 +20,8 @@ node {
         
          echo "COPYING SCRIPTS TO PVC"
          /usr/local/bin/kubectl cp $WORKSPACE/scripts $namespace/spark-benchmark-temp-pod:/spark-benchmark-mount/
-         /usr/local/bin/kubectl exec -n $namespace -i spark-benchmark-temp-pod -- mkdir -p spark-benchmark-mount/terragen-files
-         /usr/local/bin/kubectl exec -n $namespace -i spark-benchmark-temp-pod -- chmod -R 777 spark-benchmark-mount/terragen-files
+         /usr/local/bin/kubectl exec -n $namespace -i spark-benchmark-temp-pod -- mkdir -p spark-benchmark-mount/teragen-files
+         /usr/local/bin/kubectl exec -n $namespace -i spark-benchmark-temp-pod -- chmod -R 777 spark-benchmark-mount/teragen-files
       """
     }
   }
@@ -48,13 +48,12 @@ node {
     }
   }
   
-  stage('Spark Terragen Terrasort') {
+  stage('Spark Teragen Terasort') {
     withKubeConfig([credentialsId: 'spark-benchmark-token',
                     serverUrl: "${apiserverurl}"
                    ]) {
       sh "/usr/local/bin/kubectl get pods -n $namespace"
       sh """
-         echo "SUBMITTING TERRAGEN SCRIPT"
          export DRIVER_NUMBER_OF_CORES=1
          export EXECUTOR_NUMBER_OF_CORES=1
          export NUMBER_OF_EXECUTOR_INSTANCES=3
@@ -63,27 +62,28 @@ node {
          export TERASORT_INPUT_DIR="/spark-benchmark-mount/teragen-files"
          export TERASORT_OUTPUT_DIR="/spark-benchmark-mount/teravalidate-files"
          export TERAVALIDATE_INPUT_DIR="/spark-benchmark-mount/teravalidate-files"
-         /bin/j2 $WORKSPACE/yamls/spark-benchmark-terragen.yaml > /tmp/spark-benchmark-terragen.yaml
-         /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terragen.yaml -n $namespace
+	 echo "PERFORMING TERAGEN ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
+         /bin/j2 $WORKSPACE/yamls/spark-benchmark-teragen.yaml > /tmp/spark-benchmark-teragen.yaml
+         /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teragen.yaml -n $namespace
          sleep 110
-         echo "FINISHED TERRAGEN SCRIPT. TIME TO GENERATE $NUMBER_OF_ROWS_TO_GENERATE rows is,"
-         /usr/local/bin/kubectl logs spark-benchmark-teragen-driver -n t01 | grep -Po "(\\d*\\.?\\d*) seconds\$"
+         echo "FINISHED TERAGEN SCRIPT. TIME TO GENERATE $NUMBER_OF_ROWS_TO_GENERATE rows is,"
+         /usr/local/bin/kubectl logs spark-benchmark-teragen-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
          
-         echo "SUBMITTING TERRASORT SCRIPT"
+         echo "SUBMITTING TERASORT SCRIPT"
 	 /bin/j2 $WORKSPACE/yamls/spark-benchmark-terasort.yaml > /tmp/spark-benchmark-terasort.yaml
-         /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terrasort.yaml -n $namespace
+         /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terasort.yaml -n $namespace
          sleep 150
          echo "FINISHED TERASORT SRIPT. TIME TO SORT $NUMBER_OF_ROWS_TO_GENERATE rows is,"
-         /usr/local/bin/kubectl logs spark-benchmark-terasort-driver -n t01 | grep -Po "(\\d*\\.?\\d*) seconds\$"
+         /usr/local/bin/kubectl logs spark-benchmark-terasort-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
          
          echo "PERFORMING TERAVALIDATE ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
 	 /bin/j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teravalidate.yaml > /tmp/spark-benchmark-teravalidate.yaml
 	 /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teravalidate.yaml -n $namespace
          
-         /usr/local/bin/kubectl logs spark-benchmark-teravalidate-driver -n t01 | grep -Po "(\\d*\\.?\\d*) seconds\$"
+         /usr/local/bin/kubectl logs spark-benchmark-teravalidate-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
          sleep 150
-         echo "FINISHED TERRAVALIDATE. BENCHMARK TIMES ARE"
-         /usr/local/bin/kubectl logs spark-benchmark-terrasort-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
+         echo "FINISHED TERAVALIDATE. BENCHMARK TIMES ARE"
+         /usr/local/bin/kubectl logs spark-benchmark-teravalidate-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
       """
     }
   }
@@ -96,11 +96,11 @@ node {
          echo "DELETING SPARK JOIN OPERATOR"
          /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-join -n $namespace
 
-         echo "DELETING SPARK TERRAGEN OPERATOR"
-         /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terragen -n $namespace
+         echo "DELETING SPARK TERAGEN OPERATOR"
+         /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-teragen -n $namespace
 
-         echo "DELETING SPARK TERRASORT OPERATOR"
-         /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terrasort -n $namespace
+         echo "DELETING SPARK TERASORT OPERATOR"
+         /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terasort -n $namespace
 	 
 	 echo "DELETING SPARK TERAVALIDATE OPERATOR"
          /usr/local/bin/kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-teravalidate -n $namespace
