@@ -58,8 +58,17 @@ node {
          export EXECUTOR_NUMBER_OF_CORES=1
          export NUMBER_OF_EXECUTOR_INSTANCES=3
          export DF_ROWS_ARGUMENTS=$rowstogenerate
+	 export TERAGEN_OUTPUT_DIR="/spark-benchmark-mount/teragen-files"
+	 export TERASORT_INPUT_DIR="/spark-benchmark-mount/teragen-files"
+	 export TERASORT_OUTPUT_DIR="/spark-benchmark-mount/teravalidate-files"
+	 export TERAVALIDATE_INPUT_DIR="/spark-benchmark-mount/teravalidate-files"
          echo "SUBMITTING TERAGEN SCRIPT"
-         sleep 20
+	 /bin/j2 $WORKSPACE/yamls/spark-benchmark-teragen.yaml > /tmp/spark-benchmark-teragen.yaml
+	 /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teragen.yaml -n $namespace
+	 sleep 120
+	 echo "FINISHED TERAGEN SCRIPT. BENCHMARK TIMES ARE"
+	 /usr/local/bin/kubectl logs spark-benchmark-teragen-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
+         
       """
     }
   }
