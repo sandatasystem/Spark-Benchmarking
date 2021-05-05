@@ -62,28 +62,29 @@ node {
          export TERASORT_INPUT_DIR="/spark-benchmark-mount/teragen-files"
          export TERASORT_OUTPUT_DIR="/spark-benchmark-mount/teravalidate-files"
          export TERAVALIDATE_INPUT_DIR="/spark-benchmark-mount/teravalidate-files"
-	 echo "PERFORMING TERAGEN ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
+	 echo "SUBMITTING TERAGEN SCRIPT"
+	 #echo "PERFORMING TERAGEN ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
          #/bin/j2 $WORKSPACE/yamls/spark-benchmark-teragen.yaml > /tmp/spark-benchmark-teragen.yaml
          #/usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teragen.yaml -n $namespace
          #sleep 110
-         echo "FINISHED TERAGEN SCRIPT. TIME TO GENERATE $NUMBER_OF_ROWS_TO_GENERATE rows is,"
+         #echo "FINISHED TERAGEN SCRIPT. TIME TO GENERATE $NUMBER_OF_ROWS_TO_GENERATE rows is,"
          #/usr/local/bin/kubectl logs spark-benchmark-teragen-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
          
          echo "SUBMITTING TERASORT SCRIPT"
-	 /bin/j2 $WORKSPACE/yamls/spark-benchmark-terasort.yaml > /tmp/spark-benchmark-terasort.yaml
-         /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terasort.yaml -n $namespace
-         sleep 150
-         echo "FINISHED TERASORT SRIPT. TIME TO SORT $NUMBER_OF_ROWS_TO_GENERATE rows is,"
-         /usr/local/bin/kubectl logs spark-benchmark-terasort-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
+	 #/bin/j2 $WORKSPACE/yamls/spark-benchmark-terasort.yaml > /tmp/spark-benchmark-terasort.yaml
+         #/usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terasort.yaml -n $namespace
+         #sleep 150
+         #echo "FINISHED TERASORT SRIPT. TIME TO SORT $NUMBER_OF_ROWS_TO_GENERATE rows is,"
+         #/usr/local/bin/kubectl logs spark-benchmark-terasort-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
          
-         echo "PERFORMING TERAVALIDATE ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
-	 /bin/j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teravalidate.yaml > /tmp/spark-benchmark-teravalidate.yaml
-	 /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teravalidate.yaml -n $namespace
+         #echo "PERFORMING TERAVALIDATE ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
+	 #/bin/j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teravalidate.yaml > /tmp/spark-benchmark-teravalidate.yaml
+	 #/usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teravalidate.yaml -n $namespace
          
-         /usr/local/bin/kubectl logs spark-benchmark-teravalidate-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
-         sleep 150
+         #/usr/local/bin/kubectl logs spark-benchmark-teravalidate-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
+         #sleep 150
          echo "FINISHED TERAVALIDATE. BENCHMARK TIMES ARE"
-         /usr/local/bin/kubectl logs spark-benchmark-teravalidate-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
+         #/usr/local/bin/kubectl logs spark-benchmark-teravalidate-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
       """
     }
   }
