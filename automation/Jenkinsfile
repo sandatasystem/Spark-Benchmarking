@@ -40,7 +40,7 @@ node {
          echo "SUBMITTING JOIN SCRIPT"
          /bin/j2 $WORKSPACE/yamls/spark-benchmark-join.yaml > /tmp/spark-benchmark-join.yaml
          /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-join.yaml -n $namespace
-         sleep 120
+         sleep 250
          
          echo "FINISHED JOIN SCRIPT. BENCHMARK TIMES ARE"
          /usr/local/bin/kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
@@ -65,21 +65,21 @@ node {
          echo "SUBMITTING TERAGEN SCRIPT"
 	 /bin/j2 $WORKSPACE/yamls/spark-benchmark-teragen.yaml > /tmp/spark-benchmark-teragen.yaml
 	 /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teragen.yaml -n $namespace
-	 sleep 120
+	 sleep 250
 	 echo "FINISHED TERAGEN SCRIPT. BENCHMARK TIMES ARE"
 	 /usr/local/bin/kubectl logs spark-benchmark-teragen-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
 	 
 	 echo "SUBMITTING TERASORT SCRIPT"
 	 /bin/j2 $WORKSPACE/yamls/spark-benchmark-terasort.yaml > /tmp/spark-benchmark-terasort.yaml
 	 /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terasort.yaml -n $namespace
-	 sleep 150
+	 sleep 250
 	 echo "FINISHED TERASORT SRIPT. BENCHMARK TIMES ARE"
 	 /usr/local/bin/kubectl logs spark-benchmark-terasort-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
 	 
 	 echo "PERFORMING TERAVALIDATE"
 	 /bin/j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teravalidate.yaml > /tmp/spark-benchmark-teravalidate.yaml
 	 /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teravalidate.yaml -n $namespace
-	 sleep 150
+	 sleep 250
 	 echo "FINISHED TERAVALIDATE. BENCHMARK TIMES ARE"
 	 /usr/local/bin/kubectl logs spark-benchmark-teravalidate-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
       """
