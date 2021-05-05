@@ -66,7 +66,7 @@ node {
          /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-terragen.yaml -n $namespace
          sleep 110
          echo "FINISHED TERRAGEN SCRIPT. TIME TO GENERATE $NUMBER_OF_ROWS_TO_GENERATE rows is,"
-         /usr/local/bin/kubectl logs spark-benchmark-teragen-driver -n t01 | grep -Po "(\\d*\\.?\\d*) seconds$"
+         /usr/local/bin/kubectl logs spark-benchmark-teragen-driver -n t01 | grep -Po "(\\d*\\.?\\d*) seconds\$"
          
          echo "SUBMITTING TERRASORT SCRIPT"
 	 /bin/j2 $WORKSPACE/yamls/spark-benchmark-terasort.yaml > /tmp/spark-benchmark-terasort.yaml
@@ -79,7 +79,7 @@ node {
 	 /bin/j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teravalidate.yaml > /tmp/spark-benchmark-teravalidate.yaml
 	 /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-teravalidate.yaml -n $namespace
          
-         /usr/local/bin/kubectl logs spark-benchmark-teravalidate-driver -n t01 | grep -Po "(\\d*\\.?\\d*) seconds$"
+         /usr/local/bin/kubectl logs spark-benchmark-teravalidate-driver -n t01 | grep -Po "(\\d*\\.?\\d*) seconds\$"
          sleep 150
          echo "FINISHED TERRAVALIDATE. BENCHMARK TIMES ARE"
          /usr/local/bin/kubectl logs spark-benchmark-terrasort-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
