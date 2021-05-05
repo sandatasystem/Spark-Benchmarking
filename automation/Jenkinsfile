@@ -40,7 +40,7 @@ node {
          echo "SUBMITTING JOIN SCRIPT"
          /bin/j2 $WORKSPACE/yamls/spark-benchmark-join.yaml > /tmp/spark-benchmark-join.yaml
          /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-join.yaml -n $namespace
-         sleep 60
+         sleep 120
          
          echo "FINISHED JOIN SCRIPT. BENCHMARK TIMES ARE"
          /usr/local/bin/kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
