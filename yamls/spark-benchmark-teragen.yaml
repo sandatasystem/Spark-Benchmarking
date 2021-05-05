@@ -15,7 +15,7 @@ spec:
   restartPolicy:
     type: Never
   arguments:
-  - "{{NUMBER_OF_ROWS_TO_GENERATE}} {{TERAGEN_OUTPUT_DIR}}"
+  - "{{DF_ROWS_ARGUMENTS}} {{TERAGEN_OUTPUT_DIR}}"
   imagePullSecrets:
   - imagepull
 
