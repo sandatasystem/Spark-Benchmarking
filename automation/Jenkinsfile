@@ -9,9 +9,10 @@ node {
       sh """
          echo "PERFORMING MAPRTICKET GENERATION FOR USER: $mapruser"
          /usr/local/bin/kubectl exec -i tenantcli-0 bash -n $namespace -- bash -c "printf '$mapruser\n$maprpassword\njenkins-secret\nn' | kubernetes/ticketcreator.sh">/dev/null
-         sleep 5
+         sleep 10
          echo "CREATING PVC"
          /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-pvc.yaml -n $namespace
+	 sleep 15
          
          echo "CREATING TEMP POD"
          /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-temp-pod.yaml -n $namespace
@@ -34,12 +35,12 @@ node {
          export DRIVER_NUMBER_OF_CORES=1
          export EXECUTOR_NUMBER_OF_CORES=1
          export NUMBER_OF_EXECUTOR_INSTANCES=3
-         export NUMBER_OF_ROWS_TO_GENERATE=$rowstogenerate
+         export DF_ROWS_ARGUMENTS=$rowstogenerate
          export JOIN_TYPE=$join_type
          echo "SUBMITTING JOIN SCRIPT"
          /bin/j2 $WORKSPACE/yamls/spark-benchmark-join.yaml > /tmp/spark-benchmark-join.yaml
          /usr/local/bin/kubectl apply -f /tmp/spark-benchmark-join.yaml -n $namespace
-         sleep 150
+         sleep 200
          
          echo "FINISHED JOIN SCRIPT. BENCHMARK TIMES ARE"
          /usr/local/bin/kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po "(\\d*\\.?\\d*) seconds\$"
