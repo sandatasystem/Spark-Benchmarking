@@ -7,7 +7,7 @@ $HOME/Spark-Benchmarking/automation/cleanup_phase.sh $namespace
 
 # Mapr ticket generation
 printf "\n\n\n\n PERFORMING MAPRTICKET GENERATION FOR USER: $USERNAME \n\n\n\n"
-kubectl exec -it tenantcli-0 bash -n $namespace -- bash -c "printf '$USERNAME\n$PASSWORD\njenkins-secret\nn' | kubernetes/ticketcreator.sh">/dev/null
+kubectl exec -it tenantcli-0 bash -n $namespace -- bash -c "printf '${USERNAME}\n${PASSWORD}\njenkins-secret\nn' | kubernetes/ticketcreator.sh">/dev/null
 sleep 10
 
 # Creating a PVC
