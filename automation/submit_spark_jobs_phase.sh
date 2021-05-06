@@ -1,5 +1,5 @@
 namespace=$1
-type_of_benchmarks=$2
+type_of_benchmarks=${@:2}
 
 function submit_join_job(){
     # Join script program will generate 500, 1000, 2000 row dataframes and then join them
@@ -52,6 +52,10 @@ function tera_sleep(){
 
 function submit_teragen_terasort_teravalidate(){
     # Perform teragen, terasort and teravalidate on 2000 rows,  10000 rows, 100000 rows
+    export DRIVER_NUMBER_OF_CORES=1
+    export EXECUTOR_NUMBER_OF_CORES=1
+    export NUMBER_OF_EXECUTOR_INSTANCES=3
+
     export TERAGEN_OUTPUT_DIR="/spark-benchmark-mount/teragen-files"
 
     export TERASORT_INPUT_DIR="/spark-benchmark-mount/teragen-files"
@@ -98,4 +102,3 @@ fi
 if [[ $type_of_benchmarks == *"tera-benchmark"* ]]; then
     submit_teragen_terasort_teravalidate
 fi
-
