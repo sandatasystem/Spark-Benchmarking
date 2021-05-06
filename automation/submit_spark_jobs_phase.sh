@@ -1,12 +1,13 @@
 namespace=$1
+type_of_benchmarks=$2
 
-printf "\n\n\n\nSUBMITTING JOIN SCRIPT\n\n\n\n"
-export DRIVER_NUMBER_OF_CORES=1
-export EXECUTOR_NUMBER_OF_CORES=1
-export NUMBER_OF_EXECUTOR_INSTANCES=3
-
-# Join script program will generate 500, 1000, 2000 row dataframes and then join them
 function submit_join_job(){
+    # Join script program will generate 500, 1000, 2000 row dataframes and then join them
+    printf "\n\n\n\nSUBMITTING JOIN SCRIPT\n\n\n\n"
+    export DRIVER_NUMBER_OF_CORES=1
+    export EXECUTOR_NUMBER_OF_CORES=1
+    export NUMBER_OF_EXECUTOR_INSTANCES=3
+
     for row_size in 500 1000 2000
     do
 	for join_type in inner left right
@@ -61,12 +62,12 @@ function submit_teragen_terasort_teravalidate(){
     for row_size in 2000 10000 100000
     do
         # TERAGEN
-	export NUMBER_OF_ROWS_TO_GENERATE="$row_size"
+	export DF_ROWS_ARGUMENTS="$row_size"
         printf "PERFORMING TERAGEN ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
 	j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teragen.yaml > /tmp/spark-benchmark-teragen.yaml
 	kubectl apply -f /tmp/spark-benchmark-teragen.yaml -n $namespace
         tera_sleep $row_size
-	benchmark=$(kubectl logs spark-benchmark-teragen-driver -n namespace | grep -Po "(\d*\.?\d*) seconds$")
+	benchmark=$(kubectl logs spark-benchmark-teragen-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 	printf "\n\n\n FINISHED TERAGEN SRIPT. TIME TO GENERATE $row_size rows is $benchmark seconds"
 	kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-teragen -n $namespace
 
@@ -75,7 +76,7 @@ function submit_teragen_terasort_teravalidate(){
 	j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-terasort.yaml > /tmp/spark-benchmark-terasort.yaml
 	kubectl apply -f /tmp/spark-benchmark-terasort.yaml -n $namespace 
 	tera_sleep $row_size
-	benchmark=$(kubectl logs spark-benchmark-terasort-driver -n namespace | grep -Po "(\d*\.?\d*) seconds$")
+	benchmark=$(kubectl logs spark-benchmark-terasort-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 	printf "FINISHED TERASORT SRIPT. TIME TO SORT $row_size rows is $benchmark seconds"
         kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-terasort -n $namespace
 
@@ -84,12 +85,17 @@ function submit_teragen_terasort_teravalidate(){
 	j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teravalidate.yaml > /tmp/spark-benchmark-teravalidate.yaml
 	kubectl apply -f /tmp/spark-benchmark-teravalidate.yaml -n $namespace 
 	tera_sleep $row_size
-	benchmark=$(kubectl logs spark-benchmark-teravalidate-driver -n namespace | grep -Po "(\d*\.?\d*) seconds$")
+	benchmark=$(kubectl logs spark-benchmark-teravalidate-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 	printf "FINISHED TERAVALIDATE SRIPT. TIME TO VALIDAE $row_size rows is $benchmark seconds"
 	kubectl delete sparkapplication.sparkoperator.k8s.io spark-benchmark-teravalidate -n $namespace
     done
 }
 
-submit_join_job
-submit_teragen_terasort_teravalidate
+if [[ $type_of_benchmarks == *"join"* ]]; then
+    submit_join_job
+fi
+
+if [[ $type_of_benchmarks == *"tera-benchmark"* ]]; then
+    submit_teragen_terasort_teravalidate
+fi
 
