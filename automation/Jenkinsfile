@@ -8,7 +8,7 @@ node {
       sh "/usr/local/bin/kubectl get pods -n $namespace"
       sh """
          echo "PERFORMING MAPRTICKET GENERATION FOR USER: $mapruser"
-         /usr/local/bin/kubectl exec -i tenantcli-0 bash -n $namespace -- bash -c "printf '${mapruser}\\n${maprpassword}\\njenkins-secret\\nn' | kubernetes/ticketcreator.sh">/dev/null
+         /usr/local/bin/kubectl exec -i tenantcli-0 bash -n $namespace -- bash -c "printf \"$mapruser\\n$maprpassword\\njenkins-secret\\nn\" | kubernetes/ticketcreator.sh">/dev/null
          sleep 10
          echo "CREATING PVC"
          /usr/local/bin/kubectl apply -f $WORKSPACE/yamls/spark-benchmark-pvc.yaml -n $namespace
