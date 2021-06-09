@@ -7,9 +7,9 @@ spec:
     spark.mapr.user.secret: jenkins-secret
 
   type: Java
-  sparkVersion: 2.4.5
+  sparkVersion: 2.4.7
   mode: cluster
-  image: gcr.io/mapr-252711/spark-2.4.5:202010301117C
+  image: gcr.io/mapr-252711/spark-2.4.7:202104010902C
   imagePullPolicy: Always
   mainApplicationFile: "local:///spark-benchmark-mount/scripts/join_table.py"
   restartPolicy:
@@ -29,7 +29,7 @@ spec:
     coreLimit: "1000m"
     memory: "512m"
     labels:
-      version: 2.4.5
+      version: 2.4.7
     volumeMounts:
     - name: spark-benchmark-pv
       mountPath: /spark-benchmark-mount
@@ -40,7 +40,7 @@ spec:
     instances: 2
     memory: "512m"
     labels:
-      version: 2.4.5
+      version: 2.4.7
     volumeMounts:
     - mountPath: /spark-benchmark-mount
       name: spark-benchmark-pv

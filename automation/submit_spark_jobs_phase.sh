@@ -50,13 +50,13 @@ function submit_join_job(){
 
             # wait till pod and container gets created 
             printf "\n\n\n\nWAITING FOR POD AND CONTAINER TO GET CREATED\n\n\n\n"
-            sleep 40
+            sleep 120
             poll_till_benchmark_completes "spark-benchmark-join-driver" 500
 
 	    benchmark=$(kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 	    printf "\n\n\n\nFINISHED JOIN SCRIPT. TIME TO $join_type JOIN 2 DATAFRAME OF SIZE $row_size is $benchmark\n\n\n\n"
 	    kubectl delete sparkapplication spark-benchmark-join -n $namespace
-            sleep 15
+            sleep 40
 	done
     done
 }
@@ -81,7 +81,7 @@ function submit_teragen_terasort_teravalidate(){
 	j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-teragen.yaml > /tmp/spark-benchmark-teragen.yaml
 	kubectl apply -f /tmp/spark-benchmark-teragen.yaml -n $namespace
 
-        sleep 50
+        sleep 120
         poll_till_benchmark_completes "spark-benchmark-teragen-driver" 1000
 	benchmark=$(kubectl logs spark-benchmark-teragen-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 	printf "\n\n\n FINISHED TERAGEN SRIPT. TIME TO GENERATE $row_size rows is $benchmark seconds"
@@ -106,8 +106,10 @@ function submit_teragen_terasort_teravalidate(){
 	sleep 50
         poll_till_benchmark_completes "spark-benchmark-teragen-driver" 1000
 	benchmark=$(kubectl logs spark-benchmark-teravalidate-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
-	printf "FINISHED TERAVALIDATE SRIPT. TIME TO VALIDAE $row_size rows is $benchmark seconds"
+	printf "FINISHED TERAVALIDATE SRIPT. TIME TO VALIDATE $row_size rows is $benchmark seconds"
 	kubectl delete sparkapplication spark-benchmark-teravalidate -n $namespace
+
+        sleep 50
     done
 }
 
