@@ -30,6 +30,19 @@ function poll_till_benchmark_completes(){
 
 }
 
+function wait_till_sparkoperator_pod_deleted(){
+    # This method will wait till the driver pod for the spark operator is deleted
+    spark_operator_pod=$1
+    while true; do
+        check_if_operator_deleted=$(kubectl get pods -n $namespace | grep -o $spark_operator_pod)
+
+        if [[ "${#check_if_operator_deleted}" -gt "0" ]]
+        then
+            printf "\n\n\n\nSPARK OPERATOR DRIVER POD $spark_operator_pod HAS BEEN DELETED\n\n\n\n"
+            return 0
+        fi
+    done   
+}
 
 function submit_join_job(){
     # Join script program will generate 500, 1000, 2000 row dataframes and then join them
@@ -56,7 +69,8 @@ function submit_join_job(){
 	    benchmark=$(kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 	    printf "\n\n\n\nFINISHED JOIN SCRIPT. TIME TO $join_type JOIN 2 DATAFRAME OF SIZE $row_size is $benchmark\n\n\n\n"
 	    kubectl delete sparkapplication spark-benchmark-join -n $namespace
-            sleep 40
+
+            wait_till_sparkoperator_pod_deleted spark-benchmark-join-driver 
 	done
     done
 }
@@ -86,6 +100,7 @@ function submit_teragen_terasort_teravalidate(){
 	benchmark=$(kubectl logs spark-benchmark-teragen-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 	printf "\n\n\n FINISHED TERAGEN SRIPT. TIME TO GENERATE $row_size rows is $benchmark seconds"
 	kubectl delete sparkapplication spark-benchmark-teragen -n $namespace
+        wait_till_sparkoperator_pod_deleted spark-benchmark-teragen-driver
 
         # TERASORT
         printf "PERFORMING TERASORT ON $row_size ROWS"
@@ -97,6 +112,7 @@ function submit_teragen_terasort_teravalidate(){
 	benchmark=$(kubectl logs spark-benchmark-terasort-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 	printf "FINISHED TERASORT SRIPT. TIME TO SORT $row_size rows is $benchmark seconds"
         kubectl delete sparkapplication spark-benchmark-terasort -n $namespace
+        wait_till_sparkoperator_pod_deleted spark-benchmark-terasort-driver
 
         # TERAVALIDATE
         printf "PERFORMING TERAVALIDATE ON $NUMBER_OF_ROWS_TO_GENERATE ROWS"
@@ -108,6 +124,7 @@ function submit_teragen_terasort_teravalidate(){
 	benchmark=$(kubectl logs spark-benchmark-teravalidate-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 	printf "FINISHED TERAVALIDATE SRIPT. TIME TO VALIDATE $row_size rows is $benchmark seconds"
 	kubectl delete sparkapplication spark-benchmark-teravalidate -n $namespace
+        wait_till_sparkoperator_pod_deleted spark-benchmark-teravalidate-driver
 
         sleep 50
     done
