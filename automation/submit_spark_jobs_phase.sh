@@ -36,7 +36,7 @@ function wait_till_sparkoperator_pod_deleted(){
     while true; do
         check_if_operator_deleted=$(kubectl get pods -n $namespace | grep -o $spark_operator_pod)
 
-        if [[ "${#check_if_operator_deleted}" -gt "0" ]]
+        if [[ "${#check_if_operator_deleted}" -eq "0" ]]
         then
             printf "\n\n\n\nSPARK OPERATOR DRIVER POD $spark_operator_pod HAS BEEN DELETED\n\n\n\n"
             return 0
