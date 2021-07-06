@@ -8,7 +8,7 @@ Specify the type of benchmarks to run
 
 The following will run the join and teragen, terasort and teravalidate benchmarks:
 
-```./benchmark.sh namespace_name join tera-benchmark```
+```./benchmark.sh namespace_name --join 10 100 1000 --tera 10 100 1000```
 
 Please refer to the runbook for more information on how to properly run the benchmarks
 
