@@ -39,9 +39,15 @@ done
 
 printf "\n\n\n\n\nSTARTING SETUP PHASE \n\n\n\n\n"
 $HOME/Spark-Benchmarking/automation/setup_phase.sh $namespace
+
+if [[ "$?" -eq "1" ]]
+then
+    exit 1
+fi
+
 printf "\n\n\n\n\nSUBMITTING JOBS FOR BENCHMARKING \n\n\n\n\n"
 $HOME/Spark-Benchmarking/automation/submit_spark_jobs_phase.sh $namespace "${teragen_rows[*]}" "${join_rows[*]}"
 printf "\n\n\n\n\nSUBMITTING CLEANUP PHASE \n\n\n\n\n"
-$HOME/Spark-Benchmarking/automation/cleanup_phase.sh $namespace
+#$HOME/Spark-Benchmarking/automation/cleanup_phase.sh $namespace
 
 printf "Benchmarks complete .."

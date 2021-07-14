@@ -3,12 +3,28 @@ read -r -a teragen_rows <<< "$2"
 read -r -a join_rows <<< "$3"
 
 function poll_till_benchmark_completes(){
-    spark_operator_name=$1
+    spark_operator_pod=$1
     max_wait_time=$2
 
-    printf "\n\n\n\nWAITING UNTIL BENCHMARK HAS FINISHED FOR OPERATOR: $spark_operator_name \n\n\n\n"
+    sleep 2
+
+    printf "\n\n\n\nWAITING UNTIL BENCHMARK HAS FINISHED FOR OPERATOR: $spark_operator_pod \n\n\n\n"
     while true; do
-	benchmark=$(kubectl logs $spark_operator_name -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
+        benchmark_output=$(kubectl logs $spark_operator_pod -n $namespace 2>&1)
+        pod_not_created=$(echo $benchmark_output | grep -o 'pods "'$spark_operator_pod'" not found$')
+        container_not_created=$(echo $benchmark_output | grep -o 'container "spark-kubernetes-driver" in pod')
+
+        if [[ "${#pod_not_created}" -gt "0" ]]
+        then
+            printf "\n\nWAITING FOR SPARK OPERATOR POD TO BE CREATED: $spark_operator_pod\n\n"
+        elif [[ "${#container_not_created}" -gt "0" ]]
+        then
+            printf "\n\nWAITING FOR CONTAINERS TO GET CREATED FOR SPARK OPERATOR POD: $spark_operator_pod\n\n"
+        else
+            printf "\n\nSPARK OPERATOR POD AND CONTAINERS HAVE BEEN CREATED. THE SPARK JOB WILL NOW BE POLLED TILL COMPLETION\n\n"
+        fi
+
+	benchmark=$(kubectl logs $spark_operator_pod -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 
         # If the length of the benchmark is greater than 0, we know the job has finished
 	if [[ "${#benchmark}" -gt "0" ]]
@@ -16,16 +32,7 @@ function poll_till_benchmark_completes(){
 	    return 0
 	fi
 
-	sleep 1
-	max_wait_time=$((max_wait_time-1))
-
-        # If the wait time has hit 0, we know the job never finished and there is likely an error
-	if [[ "$max_wait_time" -eq "0" ]]
-	then
-            printf "\n\n\n\nTHERE MAYBE AN ERROR IN THE $spark_operator_name JOB. LOGS: \n\n\n\n\n"
-            printf `kubectl logs $spark_operator_name -n $namespace`
-	    exit 1
-	fi
+        sleep 5
     done
 
 }
@@ -61,10 +68,9 @@ function submit_join_job(){
 	    j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-join.yaml > /tmp/spark-benchmark-join.yaml
 	    kubectl apply -f /tmp/spark-benchmark-join.yaml -n $namespace
 
-            # wait till pod and container gets created 
-            printf "\n\n\n\nWAITING FOR POD AND CONTAINER TO GET CREATED\n\n\n\n"
-            sleep 120
-            poll_till_benchmark_completes "spark-benchmark-join-driver" 500
+            printf "\n\nPOLLING TILL SPARK OPERATOR POD IS CREATED, SPARK OPERATOR CONTAINERS ARE CREATED, AND SPARK JOBS COMPLETE\n\n"
+            printf "IF JOB IS NOT COMPLETING, DEBUG USING: kubectl describe sparkapplication spark-benchmark-join -n $namespace AND kubectl logs spark-benchmark-join-driver -n $namespace"
+            poll_till_benchmark_completes "spark-benchmark-join-driver"
 
 	    benchmark=$(kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
 	    printf "\n\n\n\nFINISHED JOIN SCRIPT. TIME TO $join_type JOIN 2 DATAFRAME OF SIZE $row_size is $benchmark\n\n\n\n"

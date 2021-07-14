@@ -34,6 +34,11 @@ function wait_till_pod_running(){
     done
 }
 
+if [[ -z "${USERNAME}" ]] || [[ -z "${PASSWORD}" ]]
+then
+    printf "\n\nLDAP USERNAME OR PASSWORD NOT SET. SET 'USERNAME' AND 'PASSWORD' ENVIRONMENT VARIABLES\n\n"
+    exit 1
+fi
 
 # Perform cleanup if last run was cancelled before cleanup phase
 printf "\n\nRUNNING INITIAL CLEANUP \n\n"
