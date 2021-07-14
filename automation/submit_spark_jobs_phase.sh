@@ -4,11 +4,8 @@ read -r -a join_rows <<< "$3"
 
 function poll_till_benchmark_completes(){
     spark_operator_pod=$1
-    max_wait_time=$2
 
-    sleep 2
-
-    printf "\n\n\n\nWAITING UNTIL BENCHMARK HAS FINISHED FOR OPERATOR: $spark_operator_pod \n\n\n\n"
+    printf "\n\n\n\n\t\tWAITING UNTIL BENCHMARK HAS FINISHED FOR OPERATOR: $spark_operator_pod \n\n\n\n"
     while true; do
         benchmark_output=$(kubectl logs $spark_operator_pod -n $namespace 2>&1)
         pod_not_created=$(echo $benchmark_output | grep -o 'pods "'$spark_operator_pod'" not found$')
@@ -16,12 +13,12 @@ function poll_till_benchmark_completes(){
 
         if [[ "${#pod_not_created}" -gt "0" ]]
         then
-            printf "\n\nWAITING FOR SPARK OPERATOR POD TO BE CREATED: $spark_operator_pod\n\n"
+            printf "\n\n\t\tWAITING FOR SPARK OPERATOR POD TO BE CREATED: $spark_operator_pod\n\n"
         elif [[ "${#container_not_created}" -gt "0" ]]
         then
-            printf "\n\nWAITING FOR CONTAINERS TO GET CREATED FOR SPARK OPERATOR POD: $spark_operator_pod\n\n"
+            printf "\n\n\t\tWAITING FOR CONTAINERS TO GET CREATED FOR SPARK OPERATOR POD: $spark_operator_pod\n\n"
         else
-            printf "\n\nSPARK OPERATOR POD AND CONTAINERS HAVE BEEN CREATED. THE SPARK JOB WILL NOW BE POLLED TILL COMPLETION\n\n"
+            printf "\n\n\t\tSPARK OPERATOR POD AND CONTAINERS HAVE BEEN CREATED. THE SPARK JOB WILL NOW BE POLLED TILL COMPLETION\n\n"
         fi
 
 	benchmark=$(kubectl logs $spark_operator_pod -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
@@ -45,7 +42,7 @@ function wait_till_sparkoperator_pod_deleted(){
 
         if [[ "${#check_if_operator_deleted}" -eq "0" ]]
         then
-            printf "\n\n\n\nSPARK OPERATOR DRIVER POD $spark_operator_pod HAS BEEN DELETED\n\n\n\n"
+            printf "\n\n\t\tSPARK OPERATOR DRIVER POD $spark_operator_pod HAS BEEN DELETED\n\n"
             return 0
         fi
     done   
@@ -53,7 +50,7 @@ function wait_till_sparkoperator_pod_deleted(){
 
 function submit_join_job(){
     # Join script program will generate 500, 1000, 2000 row dataframes and then join them
-    printf "\n\n\n\nSUBMITTING JOIN SCRIPT\n\n\n\n"
+    printf "\n\n\n\n\tSUBMITTING JOIN SCRIPT\n\n\n\n"
     export DRIVER_NUMBER_OF_CORES=1
     export EXECUTOR_NUMBER_OF_CORES=1
     export NUMBER_OF_EXECUTOR_INSTANCES=3
@@ -66,14 +63,14 @@ function submit_join_job(){
 	    export JOIN_TYPE="$join_type"
 
 	    j2 $HOME/Spark-Benchmarking/yamls/spark-benchmark-join.yaml > /tmp/spark-benchmark-join.yaml
-	    kubectl apply -f /tmp/spark-benchmark-join.yaml -n $namespace
+	    kubectl apply -f /tmp/spark-benchmark-join.yaml -n $namespace > /dev/null
 
-            printf "\n\nPOLLING TILL SPARK OPERATOR POD IS CREATED, SPARK OPERATOR CONTAINERS ARE CREATED, AND SPARK JOBS COMPLETE\n\n"
-            printf "IF JOB IS NOT COMPLETING, DEBUG USING: kubectl describe sparkapplication spark-benchmark-join -n $namespace AND kubectl logs spark-benchmark-join-driver -n $namespace"
+            printf "\n\n\t\tPOLLING TILL SPARK OPERATOR POD IS CREATED, SPARK OPERATOR CONTAINERS ARE CREATED, AND SPARK JOBS COMPLETE\n\n"
+            printf "\t\tIF JOB IS NOT COMPLETING, DEBUG USING: kubectl describe sparkapplication spark-benchmark-join -n $namespace AND kubectl logs spark-benchmark-join-driver -n $namespace"
             poll_till_benchmark_completes "spark-benchmark-join-driver"
 
 	    benchmark=$(kubectl logs spark-benchmark-join-driver -n $namespace | grep -Po "(\d*\.?\d*) seconds$")
-	    printf "\n\n\n\nFINISHED JOIN SCRIPT. TIME TO $join_type JOIN 2 DATAFRAME OF SIZE $row_size is $benchmark\n\n\n\n"
+	    printf "\n\n\t\tFINISHED JOIN SCRIPT. TIME TO $join_type JOIN 2 DATAFRAME OF SIZE $row_size is $benchmark\n\n"
 	    kubectl delete sparkapplication spark-benchmark-join -n $namespace
 
             wait_till_sparkoperator_pod_deleted spark-benchmark-join-driver 
@@ -135,6 +132,8 @@ function submit_teragen_terasort_teravalidate(){
         sleep 50
     done
 }
+
+printf "\n\n\n\n\nSUBMITTING JOBS FOR BENCHMARKING \n\n\n\n\n"
 
 if [[ "${#join_rows[@]}" -gt "0" ]]; then
     submit_join_job
