@@ -4,6 +4,10 @@ shift
 
 teragen_rows=()
 join_rows=()
+
+tera=false
+join=false
+
 while [[ $# -gt 0 ]]
 do
 
@@ -13,27 +17,30 @@ do
 	--tera|-teragen-benchmark)
 	shift
 
-        teragen_rows+=($1)
-        teragen_rows+=($2)
-        teragen_rows+=($3)
-
-	shift
-	shift
-        shift
+        tera=true
+        join=false
 
 	;;
         --join)
         shift
 
-        join_rows+=($1)
-        join_rows+=($2)
-        join_rows+=($3)
+        join=true
+        tera=false
 
-
-	shift
-	shift
-        shift
 	;;
+        *)
+        if [[ "$argument" =~ ^[0-9]+$ ]]
+        then
+           if [[ "$tera" = true ]]
+           then
+               teragen_rows+=($argument)
+               shift
+           elif [[ "$join" = true ]]
+           then
+               join_rows+=($argument)
+               shift
+           fi
+        fi
     esac
 done
 
