@@ -54,6 +54,6 @@ then
 fi
 
 $HOME/Spark-Benchmarking/automation/submit_spark_jobs_phase.sh $namespace "${teragen_rows[*]}" "${join_rows[*]}"
-$HOME/Spark-Benchmarking/automation/cleanup_phase.sh $namespace
+#$HOME/Spark-Benchmarking/automation/cleanup_phase.sh $namespace
 
 printf "Benchmarks complete .."
